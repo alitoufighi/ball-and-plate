@@ -32,10 +32,16 @@ int flatX = 79;
 int flatY = 67;
 
 const int MAX_X = 571 * convert1;
-const int MAX_Y = 274 * convert2;
+const int MAX_Y = 2110 * convert2;
 
 const int BORDER_X = 30;
 const int BORDER_Y = 17;
+
+
+const float MID_X = 286 * convert1;
+const float MID_Y = 105 * convert2;
+const float OFFSET_Y = 25;
+const float OFFSET_X = 60;
 
 /////TIME SAMPLE
 int Ts = 100; 
@@ -45,35 +51,18 @@ float Kp1 = 0.5;
 float Ki1 = 0.0;                                                      
 float Kd1 = 0.25;
 
-//const float bKp1 = 0.1;
-//const float bKi1 = 0.02;
-//const float bKd1 = 0.09;
-//
-//const float cKp1 = 0.14;
-//const float cKi1 = 0.015;
-//const float cKd1 = 0.06;
-
-
 float Kp2 = 0.2;                                                       
 float Ki2 = 0.0;                                                      
 float Kd2 = 0.1;
-
-//const float bKp2 = 0.1;
-//const float bKi2 = 0.02;
-//const float bKd2 = 0.09;
-//
-//const float cKp2 = 0.12;
-//const float cKi2 = 0.04;
-//const float cKd2 = 0.065;
-
-long cas=0; 
-int timer1_counter;
 
 //INIT PID
 PID myPID1(&Input1, &Output1, &Setpoint1, Kp1, Ki1, Kd1, DIRECT);
 PID myPID2(&Input2, &Output2, &Setpoint2, Kp2, Ki2, Kd2, DIRECT);
 
 #define SWITCH_SP 2
+
+double k = 0;
+float delta = 0.01;
 
 void setup()
 {
@@ -89,8 +78,8 @@ void setup()
     Serial.begin(9600);
     
     //INIT Setpoint1
-    Setpoint1 = 286 * convert1;
-    Setpoint2 = 137 * convert2;
+    Setpoint1 = MID_X;
+    Setpoint2 = MID_Y;
     
     //// Make plate flat
     Output1 = flatX;
@@ -111,10 +100,88 @@ void setup()
     ///
 }
 
+void switch_sp(){
+  static char x = '\0';
+  if(Serial.available() > 0) {
+      x = Serial.read();
+      if (x == 'q') {
+        Kp1 += delta;
+      } else if (x == 'w') {
+        Kd1 += delta;
+  //          } else if (x == 'e') {
+  //            Kd1 += delta;
+      } else if (x == 'a') {
+        Kp1 -= delta;
+      } else if (x == 's') {
+        Kd1 -= delta;
+  //          } else if (x == 'd') {
+  //            Kd1 -= delta;
+      } else if (x == 'p') {
+        Kp2 += delta;
+      } else if (x == '[') {
+        Kd2 += delta;
+  //          } else if (x == ']') {
+  //            Kd2 += delta;
+      } else if (x == 'l') {
+        Kp2 -= delta;
+      } else if (x == ';') {
+        Kd2 -= delta;
+  //          } else if (x == '\'') {
+  //            Kd2 -= delta;
+  //          } else if (x == '1') {
+  //            delta += 0.01;
+  //          } else if (x == '2') {
+  //            delta -= 0.01;
+      } else if (x == '3') {
+        Setpoint1 = MID_X - OFFSET_X;
+        Setpoint2 = MID_Y - OFFSET_Y;
+      } else if (x == '2') {
+        Setpoint1 = MID_X - OFFSET_X;
+        Setpoint2 = MID_Y;
+      } else if (x == '6') {
+        Setpoint1 = MID_X;
+        Setpoint2 = MID_Y - OFFSET_Y;
+      } else if (x == '4') {
+        Setpoint1 = MID_X;
+        Setpoint2 = MID_Y + OFFSET_Y;
+      } else if (x == '8') {
+        Setpoint1 = MID_X + OFFSET_X;
+        Setpoint2 = MID_Y;
+      } else if (x == '1') {
+        Setpoint1 = MID_X - OFFSET_X;
+        Setpoint2 = MID_Y + OFFSET_Y;
+      } else if (x == '5') {
+        Setpoint1 = MID_X;
+        Setpoint2 = MID_Y;
+      } else if (x == '9') {
+        Setpoint1 = MID_X + OFFSET_X;
+        Setpoint2 = MID_Y - OFFSET_Y;
+      } else if (x == '7') {
+        Setpoint1 = MID_X + OFFSET_X;
+        Setpoint2 = MID_Y + OFFSET_Y;
+      }
+      
+      myPID1.SetTunings(Kp1, Ki1, Kd1);
+      myPID2.SetTunings(Kp2, Ki2, Kd2); 
+      
+      Serial.print("Delta="); Serial.print(delta);
+      Serial.print(", Kp1="); Serial.print(Kp1);
+  //          Serial.print(", Ki1="); Serial.print(Ki1);
+      Serial.print(", Kd1="); Serial.print(Kd1);
+      Serial.print(", Kp2="); Serial.print(Kp2);
+  //          Serial.print(", Ki2="); Serial.print(Ki2);
+      Serial.print(", Kd2="); Serial.println(Kd2);
+   }
 
-
-//void switch_sp(){
-//  
+  if (x == '0') {
+    Setpoint1 = MID_X + 25 * cos(k);
+    Setpoint2 = MID_Y + 25 * sin(k);
+    k=k-0.0075; 
+  } else if (x == '*') {
+    Setpoint1 = MID_X + (80*cos(k))/(1+sin(k)*sin(k));
+    Setpoint2 = MID_Y + (70*sin(k)*cos(k))/(1+sin(k)*sin(k));
+    k=k+0.005; 
+  }
 //  const int OFFSET = 10;
 //  static int mode = 0;
 //  static int changed = 0;
@@ -149,8 +216,7 @@ void setup()
 //      Setpoint2 = 137 * convert2 - OFFSET;
 //      break;
 //  }
-//}
-float delta = 0.01;
+}
 
 void loop()
 {
@@ -158,49 +224,8 @@ void loop()
     
     while(Stable<50) //REGULATION LOOP
     {
-       if(Serial.available() > 0) {
-          char x = Serial.read();
-          if (x == 'q') {
-            Kp1 += delta;
-          } else if (x == 'w') {
-            Kd1 += delta;
-//          } else if (x == 'e') {
-//            Kd1 += delta;
-          } else if (x == 'a') {
-            Kp1 -= delta;
-          } else if (x == 's') {
-            Kd1 -= delta;
-//          } else if (x == 'd') {
-//            Kd1 -= delta;
-          } else if (x == 'p') {
-            Kp2 += delta;
-          } else if (x == '[') {
-            Kd2 += delta;
-//          } else if (x == ']') {
-//            Kd2 += delta;
-          } else if (x == 'l') {
-            Kp2 -= delta;
-          } else if (x == ';') {
-            Kd2 -= delta;
-//          } else if (x == '\'') {
-//            Kd2 -= delta;
-          } else if (x == '1') {
-            delta += 0.01;
-          } else if (x == '2') {
-            delta -= 0.01;
-          }
-          myPID1.SetTunings(Kp1, Ki1, Kd1);
-          myPID2.SetTunings(Kp2, Ki2, Kd2); 
-          
-          Serial.print("Delta="); Serial.print(delta);
-          Serial.print(", Kp1="); Serial.print(Kp1);
-//          Serial.print(", Ki1="); Serial.print(Ki1);
-          Serial.print(", Kd1="); Serial.print(Kd1);
-          Serial.print(", Kp2="); Serial.print(Kp2);
-//          Serial.print(", Ki2="); Serial.print(Ki2);
-          Serial.print(", Kd2="); Serial.println(Kd2);
-       }
-//        switch_sp();
+       
+        switch_sp();
         
         TSPoint p = ts.getPoint();   //measure pressure on plate
 //        switch_sp();

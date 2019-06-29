@@ -33,6 +33,7 @@ int flatY = 67;
 
 const int MAX_X = 571 * convert1;
 const int MAX_Y = 2110 * convert2;
+//////////// IN BALAYI 274 NABOD?!?
 
 const int BORDER_X = 30;
 const int BORDER_Y = 17;

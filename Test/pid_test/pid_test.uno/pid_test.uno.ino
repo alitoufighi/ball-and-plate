@@ -41,30 +41,30 @@ const int BORDER_Y = 17;
 int Ts = 100; 
 unsigned long Stable=0; 
 //PID const
-const float Kp1 = 0.3;                                                     
-const float Ki1 = 0.03;                                                      
-const float Kd1 = 0.13;
+float Kp1 = 0.5;                                                     
+float Ki1 = 0.0;                                                      
+float Kd1 = 0.25;
 
-const float bKp1 = 0.1;
-const float bKi1 = 0.02;
-const float bKd1 = 0.09;
+//const float bKp1 = 0.1;
+//const float bKi1 = 0.02;
+//const float bKd1 = 0.09;
+//
+//const float cKp1 = 0.14;
+//const float cKi1 = 0.015;
+//const float cKd1 = 0.06;
 
-const float cKp1 = 0.14;
-const float cKi1 = 0.015;
-const float cKd1 = 0.06;
 
+float Kp2 = 0.2;                                                       
+float Ki2 = 0.0;                                                      
+float Kd2 = 0.1;
 
-const float Kp2 = 0.3;                                                       
-const float Ki2 = 0.03;                                                      
-const float Kd2 = 0.13;
-
-const float bKp2 = 0.1;
-const float bKi2 = 0.02;
-const float bKd2 = 0.09;
-
-const float cKp2 = 0.12;
-const float cKi2 = 0.04;
-const float cKd2 = 0.065;
+//const float bKp2 = 0.1;
+//const float bKi2 = 0.02;
+//const float bKd2 = 0.09;
+//
+//const float cKp2 = 0.12;
+//const float cKi2 = 0.04;
+//const float cKd2 = 0.065;
 
 long cas=0; 
 int timer1_counter;
@@ -150,13 +150,56 @@ void setup()
 //      break;
 //  }
 //}
- 
+float delta = 0.01;
+
 void loop()
 {
     
     
     while(Stable<50) //REGULATION LOOP
     {
+       if(Serial.available() > 0) {
+          char x = Serial.read();
+          if (x == 'q') {
+            Kp1 += delta;
+          } else if (x == 'w') {
+            Kd1 += delta;
+//          } else if (x == 'e') {
+//            Kd1 += delta;
+          } else if (x == 'a') {
+            Kp1 -= delta;
+          } else if (x == 's') {
+            Kd1 -= delta;
+//          } else if (x == 'd') {
+//            Kd1 -= delta;
+          } else if (x == 'p') {
+            Kp2 += delta;
+          } else if (x == '[') {
+            Kd2 += delta;
+//          } else if (x == ']') {
+//            Kd2 += delta;
+          } else if (x == 'l') {
+            Kp2 -= delta;
+          } else if (x == ';') {
+            Kd2 -= delta;
+//          } else if (x == '\'') {
+//            Kd2 -= delta;
+          } else if (x == '1') {
+            delta += 0.01;
+          } else if (x == '2') {
+            delta -= 0.01;
+          }
+          myPID1.SetTunings(Kp1, Ki1, Kd1);
+          myPID2.SetTunings(Kp2, Ki2, Kd2); 
+          
+          Serial.print("Delta="); Serial.print(delta);
+          Serial.print(", Kp1="); Serial.print(Kp1);
+//          Serial.print(", Ki1="); Serial.print(Ki1);
+          Serial.print(", Kd1="); Serial.print(Kd1);
+          Serial.print(", Kp2="); Serial.print(Kp2);
+//          Serial.print(", Ki2="); Serial.print(Ki2);
+          Serial.print(", Kd2="); Serial.println(Kd2);
+       }
 //        switch_sp();
         
         TSPoint p = ts.getPoint();   //measure pressure on plate
@@ -172,6 +215,7 @@ void loop()
             TSPoint p = ts.getPoint(); // measure actual position 
             int X = (p.x - 68) * 16 / 25; //max=571, mid=286
             int Y = 274 - ((p.y - 142) * 9.0 / 25.0); //max=274, mid=137
+//            Serial.print(X); Serial.print(" "); Serial.println(Y);
             Input1 = X * convert1;
             Input2 = Y * convert2;
 
@@ -185,37 +229,37 @@ void loop()
             }
             
             // change PID at center
-            if(Input1 > Setpoint1-20 && Input1 < Setpoint1+20 && Input2 > Setpoint2-10 && Input2 < Setpoint2+10) //if ball is close to Setpoint1
-            {
-                myPID1.SetTunings(cKp1, cKi1, cKd1);
-                myPID2.SetTunings(cKp2, cKi2, cKd2);
-            }
-            // change PID at borders
-            else if(Input1 < BORDER_X || Input1 > MAX_X - BORDER_X || Input2 > BORDER_Y || Input2 < MAX_Y - BORDER_Y) //if ball is close to Setpoint1
-            {
-                myPID1.SetTunings(bKp1, bKi1, bKd1);
-                myPID2.SetTunings(bKp2, bKi2, bKd2);
-            }
-            else
-            {
-                myPID1.SetTunings(Kp1, Ki1, Kd1);
-                myPID2.SetTunings(Kp2, Ki2, Kd2); 
-            }
+//            if(Input1 > Setpoint1-20 && Input1 < Setpoint1+20 && Input2 > Setpoint2-10 && Input2 < Setpoint2+10) //if ball is close to Setpoint1
+//            {
+//                myPID1.SetTunings(cKp1, cKi1, cKd1);
+//                myPID2.SetTunings(cKp2, cKi2, cKd2);
+//            }
+//            // change PID at borders
+////            else if(Input1 < BORDER_X || Input1 > MAX_X - BORDER_X || Input2 > BORDER_Y || Input2 < MAX_Y - BORDER_Y) //if ball is close to Setpoint1
+////            {
+////                myPID1.SetTunings(bKp1, bKi1, bKd1);
+////                myPID2.SetTunings(bKp2, bKi2, bKd2);
+////            }
+//            else
+//            {
+//                myPID1.SetTunings(Kp1, Ki1, Kd1);
+//                myPID2.SetTunings(Kp2, Ki2, Kd2); 
+//            }
             
             myPID1.Compute();  //action control X compute
             myPID2.Compute();  // action control  Y compute   
-            Serial.print(Setpoint1);
-            Serial.print(" <-Setpoint1, Setpoint2-> ");
-            Serial.println(Setpoint2);
-            Serial.print("Input1: ");
-            Serial.print(Input1);
-            Serial.print(",Input2: ");
-            Serial.println(Input2); 
-            Serial.print("Output1: ");
-            Serial.print(Output1);
-            Serial.print(",Output2: ");
-            Serial.println(Output2);
-            Serial.println("-------");
+//            Serial.print(Setpoint1);
+//            Serial.print(" <-Setpoint1, Setpoint2-> ");
+//            Serial.println(Setpoint2);
+//            Serial.print("Input1: ");
+//            Serial.print(Input1);
+//            Serial.print(",Input2: ");
+//            Serial.println(Input2); 
+//            Serial.print("Output1: ");
+//            Serial.print(Output1);
+//            Serial.print(",Output2: ");
+//            Serial.println(Output2);
+//            Serial.println("-------");
         }
         else //if there is no ball on plate
         {

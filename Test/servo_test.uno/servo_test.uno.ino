@@ -72,35 +72,77 @@
 #include <Servo.h>
 
 Servo servo1;
-//Servo servo2;
+Servo servo2;
 
 //int val;
 void setup() {
   Serial.begin(9600);
   // put your setup code here, to run once:
-servo1.attach(3);
-//servo2.attach(5);
+servo1.attach(5);
+servo2.attach(6);
 //val1 = 0;
 //val2 = 0;
 
-servo1.write(0);
-//pinMode(LED_BUILTIN, OUTPUT);
+//servo1.write(0);
+pinMode(LED_BUILTIN, OUTPUT);
 //servo2.write(0);
-//digitalWrite(LED_BUILTIN, LOW);
+digitalWrite(LED_BUILTIN, HIGH);
+//delay(10000);
 }
-
+// baaze: 0-95
+// noghte shoroe: 45
 void loop() {
    // put your main code here, to run repeatedly:
-
-//  int i;
-//  int i;
-//  for (i=0;i<180;i+=5){
-//  int i;
-//  for(i=90;i>=0;--i){
+  servo1.write(79);
+  servo2.write(67);
+//  digitalWrite(LED_BUILTIN, HIGH);
+//  delay(5000);
+//  servo1.write(100);
+//  digitalWrite(LED_BUILTIN, LOW);
+//  delay(5000);
+  int i;
+  int mode = 0;
+//  for(i=40; i<70; i+=2){
 //    servo1.write(i);
 //    Serial.println(i);
+//    digitalWrite(LED_BUILTIN, mode);
+//    mode = 1 - mode;
 //    delay(1000);
 //  }
+//  for(i=180; i>0; i-=5){
+//    servo1.write(i);
+//    digitalWrite(LED_BUILTIN, LOW);
+//    servo2.write(180-i);
+//    delay(50);
+//  }
+  
+//  }
+//  for(i=180; i>0; i-=5){
+//    servo1.write(i);
+//    servo2.write(180-i);
+//    delay(100);
+//  }
+//  for (i=0;i<180;i+=5){
+//  servo1.write(0);
+//  delay(5000);
+//  servo1.write(160);
+//  delay(5000);
+//  servo1.write(180);
+//  delay(5000);
+//  int i;
+//  for(i=0;i<180;++i){
+//    servo1.write(i);
+//    Serial.println(i);
+//    digitalWrite(LED_BUILTIN, HIGH);
+//    delay(100);
+//  }
+//  for(i=180;i>0;--i){
+//    servo1.write(i);
+//    Serial.println(i);
+//    digitalWrite(LED_BUILTIN, LOW);
+//    delay(100);
+//  }
+  
 //    servo1.write(0);
 //    Serial.println(0);
 //    digitalWrite(LED_BUILTIN, HIGH);

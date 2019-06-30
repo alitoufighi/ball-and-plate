@@ -27,7 +27,7 @@ const int FLAT1 = 79;
 const int FLAT2 = 67;
 
 const int MAX_X = 571 * convert1;
-const int MAX_Y = 2110 * convert2;
+const int MAX_Y = 274 * convert2;
 //////////// IN BALAYI 274 NABOD?!?
 
 const int BORDER_X = 30;
@@ -57,7 +57,7 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 900);
 Servo servo1; // X axis
 Servo servo2; // Y axis
 
-PID PID1(&input1, &output1, &setpoint1, Kp1, Ki1, Kd1, DIRECT); // Controls X axis
+PID PID1(&input1, &output1, &setpoint1, Kp1, Ki1, Kd1, DIRECT);  // Controls X axis
 PID PID2(&input2, &output2, &setpoint2, Kp2, Ki2, Kd2, DIRECT); // Controls Y axis
 
 void switch_sp(void) {
@@ -216,11 +216,13 @@ void loop()
       servo2.attach(SERVO2_PIN);
       
       TSPoint p = ts.getPoint();
-      input1 = MAP_X(p.x);
-      input2 = MAP_Y(p.y);
-      // Serial.print(X); Serial.print(" "); Serial.println(Y); // used for plotting
+      int X = MAP_X(p.x);
+      int Y = MAP_Y(p.y);
+      input1 = X;
+      input2 = Y;
+       Serial.print(X); Serial.print(" "); Serial.println(Y); // used for plotting
 
-      if (input1 > setpoint1 - 2 && input1 < setpoint1 + 2 && input2 > setpoint2 - 2 && input2 < setpoint2 + 2)
+      if (input1 > setpoint1 - 4 && input1 < setpoint1 + 4 && input2 > setpoint2 - 4 && input2 < setpoint2 + 4)
       {
         stable++;
         digitalWrite(LED_BUILTIN, HIGH);

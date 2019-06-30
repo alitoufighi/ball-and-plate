@@ -18,9 +18,9 @@
 const float convert1 = 0.3; // converts raw x values to mm. found through manual calibration
 const float convert2 = 0.3; // converts raw y values to mm. found through manual calibration
 
-#define MAP_X(X) (((X - 68) * 16 / 25) * convert1)
+//#define MAP_X(X) (((X - 68) * 16 / 25) * convert1)
 //X: max=571, mid=286
-#define MAP_Y(Y) ((274 - ((Y - 142) * 9.0 / 25.0)) * convert2)
+//#define MAP_Y(Y) ((274 - ((Y - 142) * 9.0 / 25.0)) * convert2)
 //Y: max=274, mid=137
 
 const int FLAT1 = 79;
@@ -60,10 +60,14 @@ Servo servo2; // Y axis
 PID PID1(&input1, &output1, &setpoint1, Kp1, Ki1, Kd1, DIRECT);  // Controls X axis
 PID PID2(&input2, &output2, &setpoint2, Kp2, Ki2, Kd2, DIRECT); // Controls Y axis
 
-void switch_sp(void) {
-  static double k = 0;
-  static float delta = 0.01;
-  static char x = '\0';
+double k = 0;
+float delta = 0.01;
+char x = '\0';
+
+void switch_sp() {
+//  static double k = 0;
+//  static float delta = 0.01;
+//  static char x = '\0';
 
   if (Serial.available() > 0) {
     x = Serial.read();
@@ -165,7 +169,7 @@ void setup()
 {
   // PID Settings
   PID1.SetMode(AUTOMATIC);
-  PID1.SetOutputLimits(FLAT1 - 60, FLAT1 + 60);
+  PID1.SetOutputLimits(FLAT1 - 60, FLAT1 + 80);
   PID1.SetSampleTime(Ts);
 
   PID2.SetMode(AUTOMATIC);
@@ -196,11 +200,13 @@ void setup()
   delay(100);
 }
 
+unsigned long stable = 0;
+unsigned int no_touch_count = 0;
 
 void loop()
 {
-  static unsigned long stable = 0;
-  static unsigned int no_touch_count = 0;
+//  static unsigned long stable = 0;
+//  static unsigned int no_touch_count = 0;
   
   while (stable < 50) // Regulation Loop
   {
@@ -216,13 +222,15 @@ void loop()
       servo2.attach(SERVO2_PIN);
       
       TSPoint p = ts.getPoint();
-      int X = MAP_X(p.x);
-      int Y = MAP_Y(p.y);
-      input1 = X;
-      input2 = Y;
+//      int X = MAP_X(p.x);
+      int X = (p.x - 68) * 16 / 25;
+//      int Y = MAP_Y(p.y);
+      int Y = 274 - ((p.y - 142) * 9.0 / 25.0);
+      input1 = X * convert1;
+      input2 = Y * convert2;
        Serial.print(X); Serial.print(" "); Serial.println(Y); // used for plotting
 
-      if (input1 > setpoint1 - 4 && input1 < setpoint1 + 4 && input2 > setpoint2 - 4 && input2 < setpoint2 + 4)
+      if (input1 > setpoint1 - 3 && input1 < setpoint1 + 3 && input2 > setpoint2 - 3 && input2 < setpoint2 + 3)
       {
         stable++;
         digitalWrite(LED_BUILTIN, HIGH);
@@ -263,11 +271,15 @@ void loop()
     switch_sp();
     
     TSPoint p = ts.getPoint();
-    input1 = MAP_X(p.x);
-    input2 = MAP_Y(p.y);
+    int X = (p.x - 68) * 16 / 25;
+    int Y = 274 - ((p.y - 142) * 9.0 / 25.0);
+    input1 = X * convert1;
+    input2 = Y * convert2;
     
     if (input1 < setpoint1 - 3 || input1 > setpoint1 + 3 || input2 > setpoint2 + 3 || input2 < setpoint2 - 3) // Ball isnt close to setpoint
     {
+      servo1.attach(SERVO1_PIN); //again attach servos
+      servo2.attach(SERVO2_PIN);
       digitalWrite(LED_BUILTIN, LOW);
       stable = 0;
     }
